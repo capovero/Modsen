@@ -20,4 +20,9 @@
         <ProjectReference Include="..\EventManager.Infrastructure\EventManager.Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Controllers\" />
+      <Folder Include="DTO\" />
+    </ItemGroup>
+
 </Project>
