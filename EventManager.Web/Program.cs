@@ -3,6 +3,9 @@ using Microsoft.OpenApi.Models;
 using EventManagement.Infrastructure.Data;
 using EventManagement.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using EventManager.Domain.Entities;
+using AutoMapper;
+using EventManager.Web.Profiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +15,10 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+builder.Services.AddAutoMapper(typeof(EventProfile), typeof(ParticipantProfile), typeof(UserProfile));
+
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
