@@ -5,6 +5,7 @@ using EventManagement.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using EventManager.Domain.Entities;
 using AutoMapper;
+using EventManagement.Infrastructure.Services;
 using EventManager.Web.Profiles;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 
 builder.Services.AddAutoMapper(typeof(EventProfile), typeof(ParticipantProfile), typeof(UserProfile));
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
