@@ -6,9 +6,12 @@ using Microsoft.EntityFrameworkCore;
 using EventManager.Domain.Entities;
 using AutoMapper;
 using EventManagement.Infrastructure.Services;
+using EventManager.Web.Middleware;
 using EventManager.Web.Profiles;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -26,9 +29,9 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IParticipantRepository, ParticipantRepository>();
 
-// builder.Services.AddScoped<PasswordHasher>();
-
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
