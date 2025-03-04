@@ -8,5 +8,5 @@ public interface IParticipantRepository
     Task<List<Participant>> GetByEventIdAsync(Guid eventId);
     Task<Participant> AddAsync(Participant participant);
     Task RemoveAsync(Participant participant);
-    Task<bool> IsEmailRegisteredAsync(Guid eventId, string email);
+    Task<bool> IsUserRegisteredAsync(Guid eventId, Guid userId);
 }
