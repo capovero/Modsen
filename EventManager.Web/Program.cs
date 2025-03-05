@@ -1,25 +1,20 @@
 using System.Text;
+using EventManagement.Application.Common;
 using EventManagement.Application.Interfaces;
+using EventManagement.Application.Validators;
 using EventManagement.Infrastructure.Data;
 using EventManagement.Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore;
-using AutoMapper;
-using EventManagement.Application.Common;
-using FluentValidation;
-using EventManagement.Application.Validators;
 using EventManagement.Infrastructure.Services;
 using EventManager.Application.Services;
 using EventManager.Web.Middleware;
 using EventManager.Web.Profiles;
+using FluentValidation;
 using FluentValidation.AspNetCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
-
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -54,37 +49,37 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
     options.AddPolicy("UserPolicy", policy => policy.RequireRole("User", "Admin"));
 });
+
 builder.Services.AddAutoMapper(
     typeof(EventManager.Application.Profiles.EventProfile),
-    typeof(EventManager.Web.Profiles.EventProfile) 
+    typeof(EventManager.Web.Profiles.EventProfile),
+    typeof(EventManager.Web.Profiles.ParticipantProfile),
+    typeof(EventManager.Web.Profiles.UserProfile)
 );
-builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<ParticipantService>();
 builder.Services.AddScoped<UserService>();
-
-
-builder.Services.AddFluentValidationAutoValidation(); 
-builder.Services.AddValidatorsFromAssemblyContaining<EventDtoValidator>(ServiceLifetime.Scoped);
-
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IParticipantRepository, ParticipantRepository>();
 
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<EventDtoValidator>(ServiceLifetime.Scoped);
+
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlerMiddleware>();
-
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers(); 
+app.MapControllers();
 
 app.Run();
