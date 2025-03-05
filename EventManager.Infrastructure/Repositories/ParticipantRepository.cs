@@ -35,7 +35,7 @@ public class ParticipantRepository : IParticipantRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<bool> IsEmailRegisteredAsync(Guid eventId, string email)
+    public async Task<bool> IsUserRegisteredAsync(Guid eventId, Guid userId)
         => await _context.Participants
-            .AnyAsync(p => p.EventId == eventId && p.Email == email);
+            .AnyAsync(p => p.EventId == eventId && p.UserId == userId);
 }

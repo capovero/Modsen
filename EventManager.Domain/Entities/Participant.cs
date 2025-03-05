@@ -9,8 +9,11 @@ public class Participant
     [Required] public string LastName { get; set; }
     public DateTime BirthDate { get; set; }
     public DateTime RegistrationDate { get; set; }
-    [Required] public string Email { get; set; }
-    
     public Guid EventId { get; set; }
     public Event Event { get; set; }
+    
+    public Guid UserId { get; set; }  
+    public User User { get; set; }    
+    
+    
 }

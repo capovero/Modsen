@@ -1,5 +1,6 @@
 using AutoMapper;
-using EventManager.Domain.Entities;
+using EventManagement.Application.DTO;
+using EventManager.Application.DTO;
 using EventManager.Web.DTO.Requests;
 using EventManager.Web.DTO.Responses;
 
@@ -9,12 +10,11 @@ public class EventProfile : Profile
 {
     public EventProfile()
     {
-        CreateMap<CreateEventRequest, Event>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Participants, opt => opt.Ignore());
+        CreateMap<CreateEventRequest, EventDto>();
+        CreateMap<UpdateEventRequest, EventDto>();
         
-        CreateMap<Event, EventResponse>()
+        CreateMap<EventDto, EventResponse>()
             .ForMember(dest => dest.ParticipantsCount, 
                 opt => opt.MapFrom(src => src.Participants.Count));
     }
-}
+} 

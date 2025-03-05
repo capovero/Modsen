@@ -1,5 +1,5 @@
 using AutoMapper;
-using EventManager.Domain.Entities;
+using EventManagement.Application.DTO;
 using EventManager.Web.DTO.Requests;
 using EventManager.Web.DTO.Responses;
 
@@ -9,12 +9,8 @@ public class UserProfile : Profile
 {
     public UserProfile()
     {
-        CreateMap<RegisterUserRequest, User>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
-            .ForMember(dest => dest.Role, opt => opt.MapFrom(_ => "User"))
-            .ForMember(dest => dest.RefreshToken, opt => opt.Ignore());
+        CreateMap<RegisterUserRequest, UserRegistrationDto>();
         
-        CreateMap<User, UserResponse>();
+        CreateMap<UserDto, UserResponse>();
     }
 }

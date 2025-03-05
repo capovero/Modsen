@@ -1,6 +1,10 @@
+using Microsoft.AspNetCore.Mvc;
+
 namespace EventManager.Web.Controllers;
 
-public class UserController
+[ApiController]
+[Route("api/users")]
+public class UserController : ControllerBase
 {
     
 }

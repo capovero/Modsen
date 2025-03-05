@@ -11,4 +11,4 @@ public class EventResponse
     public int MaxParticipants { get; set; }
     public string? ImageUrl { get; set; }
     public int ParticipantsCount { get; set; }
-}
+} 

@@ -1,6 +1,10 @@
+using Microsoft.AspNetCore.Mvc;
+
 namespace EventManager.Web.Controllers;
 
-public class ParticipantsController
+[ApiController]
+[Route("api/participants")]
+public class ParticipantsController : ControllerBase
 {
     
 }

@@ -9,4 +9,4 @@ public class RegisterUserRequest
 
     [Required, MinLength(8)]
     public string Password { get; set; }
-}
+} 

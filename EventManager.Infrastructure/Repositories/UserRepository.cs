@@ -30,6 +30,10 @@ public class UserRepository : IUserRepository
         await _context.SaveChangesAsync();
         return user;
     }
-
+    
+    public async Task<User> GetByIdAsync(Guid id) 
+        => await _context.Users
+            .FirstOrDefaultAsync(e => e.Id == id);
+    
     // не забыть про рефреш токен
 }

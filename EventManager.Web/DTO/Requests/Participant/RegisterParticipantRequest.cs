@@ -13,9 +13,6 @@ public class RegisterParticipantRequest
     [Required, MaxLength(100)]
     public string LastName { get; set; }
 
-    [Required, EmailAddress]
-    public string Email { get; set; }
-
     [Required]
     public DateTime BirthDate { get; set; }
 }
