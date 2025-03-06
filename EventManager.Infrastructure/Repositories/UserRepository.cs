@@ -31,7 +31,7 @@ public class UserRepository : IUserRepository
         return user;
     }
     
-    public async Task<User> GetByIdAsync(Guid id) 
+    public async Task<User> GetByIdAsync(Guid id)  
         => await _context.Users
             .FirstOrDefaultAsync(e => e.Id == id);
 

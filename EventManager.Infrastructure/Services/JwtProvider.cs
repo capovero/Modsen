@@ -19,7 +19,7 @@ public class JwtProvider : IJwtProvider
         _options = options.Value;
     }
 
-    public string GenerateAccessToken(User user)
+    public string GenerateAccessToken(User user) 
     {
         var claims = new List<Claim>
         {

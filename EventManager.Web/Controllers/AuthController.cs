@@ -28,35 +28,34 @@ public class AuthController : ControllerBase
         var registrationDto = _mapper.Map<UserRegistrationDto>(request);
         var userDto = await _userService.RegisterUserAsync(registrationDto);
         return Ok(_mapper.Map<UserResponse>(userDto));
+        
     }
     
     [HttpPost("login")]
     public async Task<ActionResult> Login([FromBody] LoginUserRequest request)
     {
         var (accessToken, refreshToken) = await _userService.AuthenticateAsync(request.Email, request.Password);
-        Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            Expires = DateTime.UtcNow.AddDays(7),
-            SameSite = SameSiteMode.Strict
+        return Ok(new { 
+            AccessToken = accessToken,
+            RefreshToken = refreshToken
         });
-        return Ok(new { AccessToken = accessToken });
     }
     
     [HttpPost("refresh")]
-    public async Task<ActionResult> Refresh()
+    public async Task<ActionResult> Refresh(
+        [FromBody] RefreshTokenRequest request)
     {
-        var refreshToken = Request.Cookies["refreshToken"];
-        var (newAccessToken, newRefreshToken) = await _userService.RefreshTokenAsync(refreshToken);
-        Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
+        if (request == null || string.IsNullOrWhiteSpace(request.RefreshToken))
         {
-            HttpOnly = true,
-            Secure = true,
-            Expires = DateTime.UtcNow.AddDays(7),
-            SameSite = SameSiteMode.Strict
+            return BadRequest("Invalid refresh token");
+        }
+
+        var (newAccessToken, newRefreshToken) = await _userService.RefreshTokenAsync(request.RefreshToken);
+    
+        return Ok(new { 
+            AccessToken = newAccessToken,
+            RefreshToken = newRefreshToken 
         });
-        return Ok(new { AccessToken = newAccessToken });
     }
     
     [Authorize]
@@ -64,16 +63,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Logout()
     {
         var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
-    
         await _userService.RevokeRefreshTokenAsync(userId);
-
-        Response.Cookies.Delete("refreshToken", new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict
-        });
-    
         return NoContent();
     }
     

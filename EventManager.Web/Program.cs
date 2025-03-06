@@ -77,23 +77,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false,
             ValidateLifetime = true
         };
-
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                string authorization = context.Request.Headers["Authorization"];
-                if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer "))
-                {
-                    context.Token = authorization.Substring("Bearer ".Length).Trim();
-                }
-                else
-                {
-                    context.Token = context.Request.Cookies["accessToken"];
-                }
-                return Task.CompletedTask;
-            }
-        };
     });
 
 builder.Services.AddAuthorization(options =>
@@ -124,6 +107,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<EventDtoValidator>(ServiceL
 
 var app = builder.Build();
 
+app.UseStaticFiles(); 
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseMiddleware<ExceptionHandlerMiddleware>();

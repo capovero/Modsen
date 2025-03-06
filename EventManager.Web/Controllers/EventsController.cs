@@ -48,8 +48,30 @@ public class EventsController : ControllerBase
     public async Task<ActionResult<EventResponse>> Create([FromForm] CreateEventRequest request)
     {
         var eventDto = _mapper.Map<EventDto>(request);
+    
+        if (request.Image != null)
+        {
+            eventDto.ImageUrl = await SaveFile(request.Image);
+        }
+
         var createdEvent = await _eventService.CreateEventAsync(eventDto);
-        return CreatedAtAction(nameof(GetById), new { id = createdEvent.Id }, _mapper.Map<EventResponse>(createdEvent));
+        return CreatedAtAction(nameof(GetById), new { id = createdEvent.Id }, createdEvent);
+    }
+
+    private async Task<string> SaveFile(IFormFile file)
+    {
+        var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+        Directory.CreateDirectory(uploadsDir);
+    
+        var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+        var filePath = Path.Combine(uploadsDir, fileName);
+    
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+    
+        return $"/uploads/{fileName}"; 
     }
 
     [HttpPut("{id}")]
