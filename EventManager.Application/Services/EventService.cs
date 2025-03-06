@@ -34,11 +34,22 @@ public class EventService
     public async Task<EventDto> UpdateEventAsync(Guid id, EventDto eventDto)
     {
         var existingEvent = await _eventRepository.GetByIdAsync(id) 
-            ?? throw new KeyNotFoundException($"Event {id} not found");
+                            ?? throw new KeyNotFoundException($"Event {id} not found");
 
         await _validator.ValidateAndThrowAsync(eventDto);
         
-        _mapper.Map(eventDto, existingEvent);
+        existingEvent.Title = eventDto.Title;
+        existingEvent.Description = eventDto.Description;
+        existingEvent.Date = eventDto.Date;
+        existingEvent.Location = eventDto.Location;
+        existingEvent.Category = eventDto.Category;
+        existingEvent.MaxParticipants = eventDto.MaxParticipants;
+        
+        if (!string.IsNullOrEmpty(eventDto.ImageUrl))
+        {
+            existingEvent.ImageUrl = eventDto.ImageUrl;
+        }
+
         await _eventRepository.UpdateAsync(existingEvent);
         return _mapper.Map<EventDto>(existingEvent);
     }

@@ -76,9 +76,16 @@ public class EventsController : ControllerBase
 
     [HttpPut("{id}")]
     [Authorize(Policy = "AdminPolicy")]
-    public async Task<ActionResult<EventResponse>> Update(Guid id, [FromForm] UpdateEventRequest request)
+    public async Task<ActionResult<EventResponse>> Update(
+        Guid id, 
+        [FromForm] UpdateEventRequest request)
     {
         var eventDto = _mapper.Map<EventDto>(request);
+        if (request.Image != null)
+        {
+            eventDto.ImageUrl = await SaveFile(request.Image);
+        }
+
         var updatedEvent = await _eventService.UpdateEventAsync(id, eventDto);
         return Ok(_mapper.Map<EventResponse>(updatedEvent));
     }

@@ -24,7 +24,12 @@ public class EventRepository : IEventRepository
         
     public async Task<Event> AddAsync(Event entity)
     {
-        await _context.Events.AddAsync(entity);
+        var existingEvent = await _context.Events.FindAsync(entity.Id);
+        if (existingEvent == null)
+        {
+            throw new KeyNotFoundException("Event not found");
+        }
+        _context.Entry(existingEvent).CurrentValues.SetValues(entity);
         await _context.SaveChangesAsync();
         return entity;
     }
