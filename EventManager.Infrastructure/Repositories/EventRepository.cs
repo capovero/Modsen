@@ -49,20 +49,19 @@ public class EventRepository : IEventRepository
         string? location,
         string? category,
         int pageNumber = 1,
-        int pageSize = 10
-    )
+        int pageSize = 10)
     {
         var query = _context.Events.AsQueryable();
 
         if (!string.IsNullOrEmpty(title))
-            query = query.Where(e => e.Title.Contains(title));
-        
+            query = query.Where(e => EF.Functions.ILike(e.Title, $"%{title}%"));
+    
         if (date.HasValue)
             query = query.Where(e => e.Date.Date == date.Value.Date);
-        
+    
         if (!string.IsNullOrEmpty(location))
             query = query.Where(e => e.Location == location);
-        
+    
         if (!string.IsNullOrEmpty(category))
             query = query.Where(e => e.Category == category);
 

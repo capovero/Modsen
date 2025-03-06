@@ -16,7 +16,7 @@ public class ParticipantRepository : IParticipantRepository
     
     public async Task<Participant> GetByIdAsync(Guid id)
         => await _context.Participants.FindAsync(id);
-
+ 
     public async Task<List<Participant>> GetByEventIdAsync(Guid eventId)
         => await _context.Participants
             .Where(p => p.EventId == eventId)

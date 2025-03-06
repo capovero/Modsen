@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -44,6 +44,7 @@ public class ExceptionHandlerMiddleware
         {
             StatusCode = context.Response.StatusCode,
             Message = GetErrorMessage(exception),
+            Errors = GetValidationErrors(exception),
             Details = _env.IsDevelopment() ? exception.StackTrace : null
         };
 
@@ -54,8 +55,8 @@ public class ExceptionHandlerMiddleware
     {
         return exception switch
         {
+            FluentValidation.ValidationException => StatusCodes.Status400BadRequest, // Явное указание FluentValidation
             KeyNotFoundException => StatusCodes.Status404NotFound,
-            ValidationException => StatusCodes.Status400BadRequest,
             UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
             DbUpdateException => StatusCodes.Status409Conflict,
             _ => StatusCodes.Status500InternalServerError
@@ -66,11 +67,25 @@ public class ExceptionHandlerMiddleware
     {
         return exception switch
         {
-            KeyNotFoundException => "Ресурс не найден.",
-            ValidationException => "Ошибка валидации данных.",
-            UnauthorizedAccessException => "Доступ запрещен.",
-            DbUpdateException => "Конфликт при сохранении данных.",
-            _ => "Произошла внутренняя ошибка сервера."
+            FluentValidation.ValidationException => "Ошибка валидации данных",
+            KeyNotFoundException => "Ресурс не найден",
+            UnauthorizedAccessException => "Доступ запрещен",
+            DbUpdateException => "Конфликт при сохранении данных",
+            _ => "Внутренняя ошибка сервера"
         };
+    }
+
+    private static IEnumerable<object> GetValidationErrors(Exception exception)
+    {
+        if (exception is FluentValidation.ValidationException validationException)
+        {
+            return validationException.Errors
+                .Select(e => new
+                {
+                    Field = e.PropertyName,
+                    Message = e.ErrorMessage
+                });
+        }
+        return null;
     }
 }

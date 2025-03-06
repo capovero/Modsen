@@ -9,5 +9,8 @@ public interface IUserRepository
     Task<User> UpdateAsync(User user);
 
     Task<User> GetByIdAsync(Guid id);
-    // не забыть про рефреш токен
+
+    Task UpdateRefreshTokenAsync(Guid userId, string? refreshToken, DateTime? expiryTime);
+
+    Task<User?> GetByRefreshTokenAsync(string refreshToken);
 }

@@ -26,6 +26,12 @@ public class ParticipantService
         _mapper = mapper;
         _validator = validator;
     }
+    public async Task<ParticipantDto> GetParticipantByIdAsync(Guid participantId)
+    {
+        var participant = await _participantRepository.GetByIdAsync(participantId) 
+                          ?? throw new KeyNotFoundException("Participant not found");
+        return _mapper.Map<ParticipantDto>(participant);
+    }
 
     public async Task<ParticipantDto> RegisterParticipantAsync(ParticipantDto participantDto)
     {
@@ -42,11 +48,14 @@ public class ParticipantService
         return _mapper.Map<ParticipantDto>(participant);
     }
 
-    public async Task CancelRegistrationAsync(Guid participantId)
+    public async Task CancelRegistrationAsync(Guid userId, Guid participantId)
     {
         var participant = await _participantRepository.GetByIdAsync(participantId) 
-            ?? throw new KeyNotFoundException("Participant not found");
-        
+                          ?? throw new KeyNotFoundException("Participant not found");
+    
+        if (participant.UserId != userId)
+            throw new UnauthorizedAccessException("You cannot cancel another user's registration");
+    
         await _participantRepository.RemoveAsync(participant);
     }
 

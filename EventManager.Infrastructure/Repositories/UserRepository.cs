@@ -34,6 +34,25 @@ public class UserRepository : IUserRepository
     public async Task<User> GetByIdAsync(Guid id) 
         => await _context.Users
             .FirstOrDefaultAsync(e => e.Id == id);
+
+
+    public async Task UpdateRefreshTokenAsync(Guid userId, string? refreshToken, DateTime? expiryTime)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+            throw new KeyNotFoundException("User not found.");
+
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiry = expiryTime; // Теперь expiryTime допускает null
+        await _context.SaveChangesAsync();
+    }
     
-    // не забыть про рефреш токен
+    public async Task<User?> GetByRefreshTokenAsync(string refreshToken)
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(u => 
+                u.RefreshToken == refreshToken && 
+                u.RefreshTokenExpiry > DateTime.UtcNow
+            );
+    }
 }

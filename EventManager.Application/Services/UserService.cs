@@ -1,5 +1,3 @@
-// EventManager.Application/Services/UserService.cs
-
 using AutoMapper;
 using EventManagement.Application.DTO;
 using EventManagement.Application.Interfaces;
@@ -15,17 +13,20 @@ public class UserService
     private readonly IPasswordHasher _passwordHasher;
     private readonly UserRegistrationDtoValidator _validator;
     private readonly IMapper _mapper;
+    private readonly IJwtProvider _jwtProvider;
 
     public UserService(
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
         UserRegistrationDtoValidator validator,
-        IMapper mapper)
+        IMapper mapper,
+        IJwtProvider jwtProvider)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _validator = validator;
         _mapper = mapper;
+        _jwtProvider = jwtProvider;
     }
 
     public async Task<UserDto> RegisterUserAsync(UserRegistrationDto registrationDto)
@@ -51,5 +52,50 @@ public class UserService
                    ?? throw new KeyNotFoundException("User not found");
         
         return _mapper.Map<UserDto>(user);
+    }
+    
+    public async Task UpdateRefreshTokenAsync(Guid userId, string? refreshToken, DateTime expiryTime)
+    {
+        await _userRepository.UpdateRefreshTokenAsync(userId, refreshToken, expiryTime);
+    }
+    
+    public async Task<UserDto> GetUserByRefreshTokenAsync(string refreshToken)
+    {
+        var user = await _userRepository.GetByRefreshTokenAsync(refreshToken)
+                   ?? throw new UnauthorizedAccessException("Invalid or expired token");
+
+        return _mapper.Map<UserDto>(user);
+    }
+    
+    public async Task<(string AccessToken, string RefreshToken)> AuthenticateAsync(string email, string password)
+    {
+        var user = await _userRepository.GetByEmailAsync(email);
+        if (user == null || !_passwordHasher.Verify(password, user.PasswordHash))
+            throw new UnauthorizedAccessException("Invalid credentials");
+        
+        var accessToken = _jwtProvider.GenerateAccessToken(user);
+        var (refreshToken, expiry) = _jwtProvider.GenerateRefreshToken();
+        
+        await UpdateRefreshTokenAsync(user.Id, refreshToken, expiry);
+
+        return (accessToken, refreshToken);
+    }
+    
+    public async Task RevokeRefreshTokenAsync(Guid userId)
+    {
+        await _userRepository.UpdateRefreshTokenAsync(userId, null, null);
+    }
+    public async Task<(string AccessToken, string RefreshToken)> RefreshTokenAsync(string refreshToken)
+    {
+        var user = await _userRepository.GetByRefreshTokenAsync(refreshToken);
+        if (user == null || user.RefreshTokenExpiry < DateTime.UtcNow)
+            throw new UnauthorizedAccessException("Invalid or expired token");
+        
+        var newAccessToken = _jwtProvider.GenerateAccessToken(user);
+        var (newRefreshToken, newExpiry) = _jwtProvider.GenerateRefreshToken();
+        
+        await UpdateRefreshTokenAsync(user.Id, newRefreshToken, newExpiry);
+
+        return (newAccessToken, newRefreshToken);
     }
 }

@@ -67,10 +67,13 @@ public class EventService
         int pageNumber = 1,
         int pageSize = 10)
     {
+        if (pageNumber < 1) throw new ArgumentException("Page number must be greater than 0.");
+        if (pageSize < 1) throw new ArgumentException("Page size must be greater than 0.");
+
         var events = await _eventRepository.GetByCriteriaAsync(
             title, date, location, category, pageNumber, pageSize
         );
-        
+    
         return _mapper.Map<List<EventDto>>(events);
     }
 }
