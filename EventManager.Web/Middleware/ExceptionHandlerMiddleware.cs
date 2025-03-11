@@ -55,7 +55,7 @@ public class ExceptionHandlerMiddleware
     {
         return exception switch
         {
-            FluentValidation.ValidationException => StatusCodes.Status400BadRequest, // Явное указание FluentValidation
+            FluentValidation.ValidationException => StatusCodes.Status400BadRequest, 
             KeyNotFoundException => StatusCodes.Status404NotFound,
             UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
             DbUpdateException => StatusCodes.Status409Conflict,

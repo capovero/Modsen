@@ -54,16 +54,19 @@ public class UserService
         return _mapper.Map<UserDto>(user);
     }
     
-    public async Task UpdateRefreshTokenAsync(Guid userId, string? refreshToken, DateTime expiryTime)
+    public async Task UpdateRefreshTokenAsync(Guid userId, string? refreshToken, DateTime? expiryTime)
     {
-        await _userRepository.UpdateRefreshTokenAsync(userId, refreshToken, expiryTime);
+        var user = await _userRepository.GetByIdAsync(userId) 
+                   ?? throw new KeyNotFoundException("User not found");
+        await _userRepository.UpdateRefreshTokenAsync(user, refreshToken, expiryTime);
     }
     
     public async Task<UserDto> GetUserByRefreshTokenAsync(string refreshToken)
     {
-        var user = await _userRepository.GetByRefreshTokenAsync(refreshToken)
-                   ?? throw new UnauthorizedAccessException("Invalid or expired token");
-
+        var user = await _userRepository.GetByRefreshTokenAsync(refreshToken);
+        if (user == null || user.RefreshTokenExpiry < DateTime.UtcNow)
+            throw new UnauthorizedAccessException("Invalid or expired token");
+        
         return _mapper.Map<UserDto>(user);
     }
     
@@ -83,7 +86,7 @@ public class UserService
     
     public async Task RevokeRefreshTokenAsync(Guid userId)
     {
-        await _userRepository.UpdateRefreshTokenAsync(userId, null, null);
+        await UpdateRefreshTokenAsync(userId, null, null);
     }
     public async Task<(string AccessToken, string RefreshToken)> RefreshTokenAsync(string refreshToken)
     {

@@ -30,6 +30,19 @@ public class EventServiceTests : IDisposable
         _service = new EventService(repository, mapper, validator);
     }
 
+    
+    // public EventService(
+    //     IEventRepository eventRepository,
+    //     IParticipantRepository participantRepository,
+    //     IMapper mapper,
+    //     EventDtoValidator validator)
+    // {
+    //     _eventRepository = eventRepository;
+    //     _participantRepository = participantRepository;
+    //     _mapper = mapper;
+    //     _validator = validator;
+    // }
+    
     [Fact]
     public async Task CreateEventAsync_ShouldCreateEventWithAllFields()
     {

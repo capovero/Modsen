@@ -17,11 +17,9 @@ public class EventRepository : IEventRepository
     public async Task<List<Event>> GetAllAsync() 
         => await _context.Events.ToListAsync();
     
-    public async Task<Event> GetByIdAsync(Guid id) 
-        => await _context.Events
-        .Include(e => e.Participants)
-        .FirstOrDefaultAsync(e => e.Id == id);
-        
+    public async Task<Event?> GetByIdAsync(Guid id) 
+        => await _context.Events.FirstOrDefaultAsync(e => e.Id == id);
+
     public async Task<Event> AddAsync(Event entity)
     {
         await _context.Events.AddAsync(entity);
@@ -36,41 +34,12 @@ public class EventRepository : IEventRepository
         return entity;
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task DeleteAsync(Event entity)
     {
-        var entity = await GetByIdAsync(id);
         _context.Events.Remove(entity);
         await _context.SaveChangesAsync();
     }
     
-    public async Task<List<Event>> GetByCriteriaAsync(
-        string? title,
-        DateTime? date,
-        string? location,
-        string? category,
-        int pageNumber = 1,
-        int pageSize = 10)
-    {
-        var query = _context.Events.AsQueryable();
-
-        if (!string.IsNullOrEmpty(title))
-            query = query.Where(e => EF.Functions.ILike(e.Title, $"%{title}%"));
-    
-        if (date.HasValue)
-            query = query.Where(e => e.Date.Date == date.Value.Date);
-    
-        if (!string.IsNullOrEmpty(location))
-            query = query.Where(e => e.Location == location);
-    
-        if (!string.IsNullOrEmpty(category))
-            query = query.Where(e => e.Category == category);
-
-        return await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-    }
-
-    public async Task<int> GetParticipantsCountAsync(Guid eventId)
-        => await _context.Participants.CountAsync(p => p.EventId == eventId);
+    public IQueryable<Event> GetQueryable()
+        => _context.Events.AsQueryable();
 }

@@ -14,7 +14,7 @@ public class ParticipantRepository : IParticipantRepository
         _context = context;
     }
     
-    public async Task<Participant> GetByIdAsync(Guid id)
+    public async Task<Participant?> GetByIdAsync(Guid id)
         => await _context.Participants.FindAsync(id);
  
     public async Task<List<Participant>> GetByEventIdAsync(Guid eventId)
@@ -27,6 +27,11 @@ public class ParticipantRepository : IParticipantRepository
         await _context.Participants.AddAsync(participant);
         await _context.SaveChangesAsync();
         return participant;
+    }
+    public async Task<int> CountByEventIdAsync(Guid eventId)
+    {
+        return await _context.Participants
+            .CountAsync(p => p.EventId == eventId);
     }
 
     public async Task RemoveAsync(Participant participant)

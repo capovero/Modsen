@@ -1,4 +1,3 @@
-// EventManager.Application/Services/ParticipantService.cs
 using AutoMapper;
 using EventManagement.Application.DTO;
 using EventManagement.Application.Interfaces;
@@ -38,11 +37,12 @@ public class ParticipantService
         await _validator.ValidateAndThrowAsync(participantDto);
 
         var eventEntity = await _eventRepository.GetByIdAsync(participantDto.EventId) 
-            ?? throw new KeyNotFoundException("Event not found");
-        
-        if (eventEntity.Participants.Count >= eventEntity.MaxParticipants)
+                          ?? throw new KeyNotFoundException("Event not found");
+    
+        var participantsCount = await _participantRepository.CountByEventIdAsync(eventEntity.Id);
+        if (participantsCount >= eventEntity.MaxParticipants)
             throw new InvalidOperationException("No available slots");
-        
+    
         var participant = _mapper.Map<Participant>(participantDto);
         await _participantRepository.AddAsync(participant);
         return _mapper.Map<ParticipantDto>(participant);

@@ -14,7 +14,7 @@ public class UserRepository : IUserRepository
         _context = context;
     }
     
-    public async Task<User> GetByEmailAsync(string email)
+    public async Task<User?> GetByEmailAsync(string email)
         => await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
     public async Task<User> AddAsync(User user)
@@ -31,28 +31,17 @@ public class UserRepository : IUserRepository
         return user;
     }
     
-    public async Task<User> GetByIdAsync(Guid id)  
-        => await _context.Users
-            .FirstOrDefaultAsync(e => e.Id == id);
+    public async Task<User?> GetByIdAsync(Guid id)  
+        => await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
 
 
-    public async Task UpdateRefreshTokenAsync(Guid userId, string? refreshToken, DateTime? expiryTime)
+    public async Task UpdateRefreshTokenAsync(User user, string? refreshToken, DateTime? expiryTime)
     {
-        var user = await _context.Users.FindAsync(userId);
-        if (user == null)
-            throw new KeyNotFoundException("User not found.");
-
         user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiry = expiryTime; // Теперь expiryTime допускает null
+        user.RefreshTokenExpiry = expiryTime;
         await _context.SaveChangesAsync();
     }
     
     public async Task<User?> GetByRefreshTokenAsync(string refreshToken)
-    {
-        return await _context.Users
-            .FirstOrDefaultAsync(u => 
-                u.RefreshToken == refreshToken && 
-                u.RefreshTokenExpiry > DateTime.UtcNow
-            );
-    }
+        => await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
 }
